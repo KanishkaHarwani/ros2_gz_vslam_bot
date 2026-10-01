@@ -58,7 +58,8 @@ Full setup and verification steps: [`docs/RUNBOOK.md`](docs/RUNBOOK.md).
 ros2_gz_vslam_bot/
 ├── description/     # xacro: links, joints, materials, gazebo_{materials,controls,sensors}
 ├── launch/          # rsp.launch.py, launch_sim.launch.py
-├── config/          # gz_bridge.yaml, view_bot.rviz
+├── config/          # gz_bridge.yaml
+├── rviz/            # ros2_gz_vslam_bot.rviz (main RViz config)
 ├── worlds/          # outdoor_flat.world (+ more per test stage)
 ├── docs/            # public documentation (this index below)
 ├── startup.sh       # one-command bring-up

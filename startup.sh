@@ -2,7 +2,7 @@
 #
 # startup.sh — bring up the ros2_gz_vslam_bot stack (ROS 2 Jazzy + Gazebo Harmonic):
 #   1. launch_sim.launch.py  (Gazebo + robot_state_publisher + spawn + bridges)
-#   2. rviz2                 (config/view_bot.rviz from the installed package)
+#   2. rviz2                 (rviz/ros2_gz_vslam_bot.rviz from the installed package)
 #   3. joy_node              (raw joystick input)
 #   4. teleop_twist_joy      (joystick -> /cmd_vel)
 #
@@ -10,7 +10,8 @@
 #   ./startup.sh [--no-rviz] [--no-joy]
 #
 # Environment overrides:
-#   WS=~/ros2_ws        workspace containing install/setup.bash
+#   WS=~/learn_ws       workspace containing install/setup.bash (auto-detected
+#                       from the script location if unset)
 #   JOY_DEVICE_ID=0     joystick index for joy_node
 #
 # Ctrl+C once stops everything this script started.
@@ -20,7 +21,18 @@
 # ---- Adjust these if your setup differs ------------------------------
 PACKAGE_NAME="ros2_gz_vslam_bot"
 ROS_SETUP="/opt/ros/jazzy/setup.bash"
-WS="${WS:-$HOME/learn_ws}"
+
+# Workspace: $WS if set; else auto-detect from this script's location
+# (<ws>/src/<pkg>/startup.sh -> <ws>); else fall back to ~/ros2_ws.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -z "${WS:-}" ]; then
+    candidate="$(cd "$SCRIPT_DIR/../.." 2>/dev/null && pwd)"
+    if [ -f "$candidate/install/setup.bash" ]; then
+        WS="$candidate"
+    else
+        WS="$HOME/ros2_ws"
+    fi
+fi
 JOY_DEVICE_ID="${JOY_DEVICE_ID:-0}"
 
 # teleop_twist_joy mapping — controller-specific; re-check with
@@ -40,12 +52,12 @@ for arg in "$@"; do
     case "$arg" in
         --no-rviz) USE_RVIZ=0 ;;
         --no-joy)  USE_JOY=0 ;;
-        -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
+        -h|--help) sed -n '2,19p' "$0"; exit 0 ;;
         *) echo "Unknown option: $arg (try --help)"; exit 1 ;;
     esac
 done
 
-echo "==> Sourcing ROS 2 environment"
+echo "==> Sourcing ROS 2 environment (workspace: $WS)"
 if [ ! -f "$ROS_SETUP" ]; then
     echo "ERROR: $ROS_SETUP not found. Is ROS 2 Jazzy installed?"
     exit 1
@@ -63,7 +75,7 @@ if ! ros2 pkg prefix "$PACKAGE_NAME" >/dev/null 2>&1; then
     echo "ERROR: package '$PACKAGE_NAME' not found in the sourced workspace."
     exit 1
 fi
-RVIZ_CONFIG="$(ros2 pkg prefix --share "$PACKAGE_NAME")/config/view_bot.rviz"
+RVIZ_CONFIG="$(ros2 pkg prefix --share "$PACKAGE_NAME")/rviz/ros2_gz_vslam_bot.rviz"
 
 # Each long-running process gets its own session (setsid) so cleanup can
 # signal the whole process tree, including gz-sim children of `ros2 launch`.

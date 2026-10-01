@@ -19,7 +19,7 @@ Move items to "Resolved" (with the date and test log) when closed.
 | 10 | World | GPS origin in `outdoor_flat.world` is a placeholder (0°, 0°, 0 m) | Set to the intended test-site coordinates |
 | 11 | World | The ground plane is featureless | Monocular VIO has nothing to track; add texture/feature objects before Test 4 |
 | 12 | World | `worlds/flatland.world` is stale: dangling absolute mesh path and a leftover unrelated robot model from a Gazebo-classic export | Clean up or replace before obstacle tests; no rough-terrain world exists yet |
-| 13 | RViz | `config/view_bot.rviz` still references the removed lidar/depth/point-cloud displays and the old camera frame names | Update for the new frames, two camera images, IMU and GPS |
+| 13 | RViz | `rviz/ros2_gz_vslam_bot.rviz` replaces the old `config/view_bot.rviz` (lidar/depth/point-cloud displays removed) but has not been verified on a live run. The saved window layout may still hold leftover Image docks | Check on first launch, rearrange docks, then re-save the config from RViz. IMU and GPS have no built-in RViz displays; use PlotJuggler/`rqt_plot` and `ros2 topic echo` |
 | 14 | Packaging | `package.xml` does not list `joy`, `teleop_twist_joy` or `rviz2` as exec dependencies | Add so `rosdep` installs them |
 | 15 | Packaging | Repo/package rename to a valid underscore name is only partly done: some files and docs may still use the hyphenated name, and the GitHub repo/remote/LICENSE line may still need updating | Finish the rename pass |
 | 16 | Layout | v1/v2 repository split is not yet implemented | See [ARCHITECTURE](ARCHITECTURE.md#6-deployment-variants) |

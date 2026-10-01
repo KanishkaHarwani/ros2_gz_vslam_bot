@@ -87,10 +87,13 @@ Joystick axis/button indices are controller-specific. Check with
 
 ## 5. RViz
 ```bash
-rviz2 -d $(ros2 pkg prefix --share ros2_gz_vslam_bot)/config/view_bot.rviz
+rviz2 -d $(ros2 pkg prefix --share ros2_gz_vslam_bot)/rviz/ros2_gz_vslam_bot.rviz \
+  --ros-args -p use_sim_time:=true
 ```
-Fixed Frame is `odom`. See [KNOWN_ISSUES](KNOWN_ISSUES.md) regarding the state
-of `view_bot.rviz`.
+`use_sim_time:=true` is required when launching RViz by hand (`startup.sh` adds
+it); without it, TF and image timestamps (sim time) do not match RViz's wall
+clock and displays stay empty. Fixed Frame is `odom`; the view follows
+`base_link`. See [KNOWN_ISSUES](KNOWN_ISSUES.md) (#13) regarding the config.
 
 ## 6. Troubleshooting
 
@@ -105,3 +108,4 @@ of `view_bot.rviz`.
 | Robot doesn't move on `/cmd_vel` | Wheel joint names in `gazebo_controls.xacro` must match `joints.xacro`; check `/cmd_vel` is bridged |
 | RViz shows nothing under Fixed Frame `odom` | `/tf` not bridged; check `gz_bridge.yaml` and that `odom` appears in `ros2 run tf2_tools view_frames` |
 | RViz images blank | Image display QoS must be Best Effort |
+| RViz shows no robot / "No transform" errors when started by hand | Missing `use_sim_time:=true`; also check RobotModel durability is Transient Local |
