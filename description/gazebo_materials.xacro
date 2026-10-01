@@ -11,8 +11,8 @@
     <!-- Anisotropic wheel friction: mu1 (fdir1 = rolling direction, local X)
          kept high for straight-line traction; mu2 (lateral, local Y) lowered
          so wheels can slide sideways during a skid-steer pivot without
-         stick-slip. kp/kd soften contact stiffness slightly to reduce
-         numerical jitter. Starting values — tune mu2 down further (e.g. 0.15)
+         stick-slip. kp/kd are ODE-only (ignored by DART, the Harmonic
+         default engine) and kept only in case you switch engines. Starting values — tune mu2 down further (e.g. 0.15)
          if rocking persists, or up if the robot starts sliding out during
          normal turns. -->
     <gazebo reference="l_f_wheel_link">
@@ -73,29 +73,23 @@
         </material>
     </gazebo>
 
-    <gazebo reference="f_rgbd_link">
+    <gazebo reference="f_camera_link">
         <material>
             <ambient>0 1 0 1</ambient>
             <diffuse>0 1 0 1</diffuse>
         </material>
     </gazebo>
-    <gazebo reference="r_rgbd_link">
+    <gazebo reference="r_camera_link">
         <material>
             <ambient>0 1 0 1</ambient>
             <diffuse>0 1 0 1</diffuse>
         </material>
     </gazebo>
 
-    <gazebo reference="f_lidar_link">
+    <gazebo reference="gps_link">
         <material>
-            <ambient>0 0 1 1</ambient>
-            <diffuse>0 0 1 1</diffuse>
-        </material>
-    </gazebo>
-    <gazebo reference="r_lidar_link">
-        <material>
-            <ambient>0 0 1 1</ambient>
-            <diffuse>0 0 1 1</diffuse>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
         </material>
     </gazebo>
 

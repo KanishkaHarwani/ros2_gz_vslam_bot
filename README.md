@@ -1,73 +1,83 @@
-# Gazebo ROS VSLAM
+# Gazebo ROS VSLAM (`ros2_gz_vslam_bot`)
 
-A ROS 2 + Gazebo (gz-sim) simulation project to develop and progressively
-validate a Visual SLAM (VSLAM) pipeline, moving from teleop sanity checks
-through flat-land VSLAM to full autonomy on rough terrain with real obstacles.
+A ROS 2 + Gazebo simulation project for developing and validating a
+vision-based localization pipeline on an **outdoor ground robot**, stage by
+stage: teleop and recording, monocular visual-inertial odometry, monocular
+obstacle/distance estimation for **user-controlled driving**, and finally
+Nav2-based autonomy.
 
-## Objective
+> **Status:** the robot description and simulation were migrated to
+> Ubuntu 24.04 / ROS 2 Jazzy / Gazebo Harmonic and have not yet been validated
+> end-to-end on that stack. See [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md).
+> The roadmap is a draft; scope is still being decided.
 
-Build and test a ground robot capable of visual SLAM-based localization and
-mapping in simulation, validated stage-by-stage against odometry, then
-extended toward obstacle detection, path planning, and full autonomy. See
-[`ROADMAP.md`](./ROADMAP.md) for the full staged test plan.
-
-## Robot Spec
+## Robot
 
 | Aspect | Spec |
 |---|---|
-| Drivetrain | 4-wheel differential (skid-steer) drive |
-| Cameras | 2x (front + back), 1920x1080 @ 60fps |
-| Payload | None (no EO/additional sensor payload beyond the two cameras) |
+| Environment | Outdoor |
+| Drivetrain | 4-wheel skid-steer, simulated with Gazebo's `DiffDrive` (two joints per side) |
+| Cameras | 2x monocular (front + rear), 130° horizontal FOV, 640x480 @ 20 Hz |
+| IMU | 1x, 200 Hz |
+| GPS | 1x (`navsat`), 10 Hz |
+| Other sensors | None. No lidar, no depth camera |
 
-**Open decisions to settle early:**
-1. Front/back camera placement and FOV — overlapping (for stitching / 360
-   coverage) or strictly opposite-facing?
-2. `gz-sim-diff-drive-system` models 2 "sides," not 4 independently driven
-   wheels with true skid physics — decide whether that approximation is
-   acceptable, or whether a dedicated skid-steer plugin is needed for
-   realistic slip (this matters for the odometry-comparison test).
-3. Any additional sensors (IMU, wheel encoders beyond what the diff-drive
-   plugin provides) needed for the odometry baseline in Test 2?
+The camera resolution/rate is deliberately below the original 1080p/60 fps
+target to keep simulation load manageable.
 
-## Suggested Repository Structure
+## Platform
+
+- Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic (`gz-sim`)
+- `ros_gz_sim`, `ros_gz_bridge`, `ros_gz_image`
+- VSLAM/VIO framework: **not yet chosen** (see [Roadmap](docs/ROADMAP.md))
+
+## Deployment variants (planned)
+
+| Variant | Where things run |
+|---|---|
+| **v1** | Everything on one laptop: simulation, perception, control |
+| **v2** | Laptop runs the simulation; a Jetson runs perception and control |
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the interface between
+the two machines.
+
+## Quick start
+
+```bash
+cd ~/<your_ws> && colcon build --packages-select ros2_gz_vslam_bot
+source install/setup.bash
+./src/ros2_gz_vslam_bot/startup.sh        # Gazebo + RViz + joystick teleop
+# options: --no-rviz  --no-joy
+```
+
+Full setup and verification steps: [`docs/RUNBOOK.md`](docs/RUNBOOK.md).
+
+## Repository layout
 
 ```
-gazebo-ros-vslam/
-├── description/          # xacro/urdf
-│   ├── robot.urdf.xacro
-│   ├── links.xacro
-│   ├── joints.xacro
-│   ├── materials.xacro
-│   ├── gazebo_materials.xacro
-│   ├── gazebo_control.xacro
-│   └── gazebo_sensors.xacro
-├── launch/
-│   ├── rsp.launch.py
-│   └── launch_sim.launch.py
-├── config/
-│   ├── gz_bridge.yaml
-│   └── view_bot.rviz
-├── worlds/
-│   └── flatland.world     # + terrain worlds added per test stage
-├── vslam/                 # VSLAM node configs / launch (once framework chosen)
-├── docs/
-│   ├── ROADMAP.md
-│   └── test_logs/         # one dated log per test run, see ROADMAP.md
+ros2_gz_vslam_bot/
+├── description/     # xacro: links, joints, materials, gazebo_{materials,controls,sensors}
+├── launch/          # rsp.launch.py, launch_sim.launch.py
+├── config/          # gz_bridge.yaml, view_bot.rviz
+├── worlds/          # outdoor_flat.world (+ more per test stage)
+├── docs/            # public documentation (this index below)
+├── startup.sh       # one-command bring-up
 ├── package.xml
 └── CMakeLists.txt
 ```
 
-## Software Stack (proposed)
+The v1/v2 split is planned but not yet reflected in the layout; the intended
+shape is described in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-- ROS 2 (Jazzy/Humble — confirm which distro you're targeting)
-- Gazebo (gz-sim), `ros_gz_bridge`, `ros_gz_image`
-- VSLAM framework — not yet chosen. Candidates:
-  - **RTAB-Map** — easiest ROS 2 integration, RGB-D + stereo, built-in
-    loop closure and occupancy-grid output (good fit for the mapping test)
-  - **ORB-SLAM3** — strong monocular/stereo/VIO accuracy, more integration work
-  - **OpenVSLAM** — flexible but less actively maintained
-  - Aruco-based VSLAM — useful for early flat-land tests with markers before
-    moving to natural-feature tracking
+## Documentation
+
+| Doc | Contents |
+|---|---|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Robot model, frames, topics, launch flow, v1/v2 deployment |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Staged test plan and open decisions (draft) |
+| [`docs/RUNBOOK.md`](docs/RUNBOOK.md) | Install, run, verify, troubleshoot |
+| [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md) | Open issues, caveats, resolved history |
+| `docs/test_logs/` | One dated log per test run |
 
 ## References
 
@@ -79,5 +89,4 @@ gazebo-ros-vslam/
 6. VSLAM-Navigation — https://github.com/tranquykien/visual-slam-navigation
 
 > Before pulling code from any of these into the repo, check each one's
-> license and confirm compatibility with your intended license for this
-> project.
+> license and confirm compatibility with this project's license (MIT).

@@ -3,7 +3,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
+from launch.actions import AppendEnvironmentVariable, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 from launch_ros.actions import Node
@@ -12,53 +12,58 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     package_name = 'ros2_gz_vslam_bot'
+    pkg_share = get_package_share_directory(package_name)
 
-    # Tell Gazebo where to resolve model:// URIs from. ros_gz_sim rewrites the
-    # URDF's package:// mesh paths into model://ros2_gz_vslam_bot/... when
-    # converting to SDF, so Gazebo needs the *parent* of the installed share
-    # directory on its resource path to find the "ros2_gz_vslam_bot" folder.
-    gz_resource_path = SetEnvironmentVariable(
-        'IGN_GAZEBO_RESOURCE_PATH',
-        os.path.join(get_package_share_directory(package_name), '..')
+    # Gazebo Harmonic: GZ_SIM_RESOURCE_PATH (was IGN_GAZEBO_RESOURCE_PATH on
+    # Fortress). ros_gz_sim rewrites the URDF's package:// mesh URIs into
+    # model://ros2_gz_vslam_bot/..., so Gazebo needs the *parent* of the
+    # installed share dir on its path. Appended, so any path the user has
+    # already exported is preserved.
+    gz_resource_path = AppendEnvironmentVariable(
+        'GZ_SIM_RESOURCE_PATH',
+        os.path.join(pkg_share, '..')
     )
 
-    # Include the robot_state_publisher launch file, provided by this package. Force sim time on.
+    # robot_state_publisher (force sim time on)
     rsp = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory(package_name), 'launch', 'rsp.launch.py'
-        )]), launch_arguments={'use_sim_time': 'true'}.items()
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_share, 'launch', 'rsp.launch.py')
+        ),
+        launch_arguments={'use_sim_time': 'true'}.items()
     )
 
-    # Include ros_gz_sim's launch file to start the gz-sim server + GUI with a world
-    world_path = os.path.join(
-        get_package_share_directory(package_name), 'worlds', 'empty.world'
-    )
+    # gz-sim server + GUI with the outdoor world. -r = start running.
+    # on_exit_shutdown: closing Gazebo tears down the whole launch.
+    world_path = os.path.join(pkg_share, 'worlds', 'outdoor_flat.world')
 
     gz_sim = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py'
-        )]),
-        launch_arguments={'gz_args': f'-r {world_path}'}.items()
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory('ros_gz_sim'),
+                         'launch', 'gz_sim.launch.py')
+        ),
+        launch_arguments={
+            'gz_args': f'-r {world_path}',
+            'on_exit_shutdown': 'true',
+        }.items()
     )
 
-    # Spawn the robot into gz-sim from the /robot_description topic.
-    # -z 0.05 gives a small clearance margin above the ground plane so the
-    # first physics step doesn't resolve an interpenetrating contact.
+    # Spawn the robot from /robot_description. -z 0.05 leaves a small
+    # clearance above the ground so the first physics step doesn't resolve
+    # an interpenetrating contact.
     spawn_entity = Node(
         package='ros_gz_sim',
         executable='create',
         arguments=[
             '-topic', 'robot_description',
             '-name', 'my_bot',
-            '-z', '0.05'
+            '-z', '0.05',
         ],
         output='screen'
     )
 
-    # Bridge gz-transport <-> ROS 2 topics using config/gz_bridge.yaml
-    bridge_config = os.path.join(
-        get_package_share_directory(package_name), 'config', 'gz_bridge.yaml'
-    )
+    # General bridge: clock, odom, tf, joint_states, cmd_vel, camera_info,
+    # imu, gps/fix (see config/gz_bridge.yaml)
+    bridge_config = os.path.join(pkg_share, 'config', 'gz_bridge.yaml')
 
     gz_bridge_node = Node(
         package='ros_gz_bridge',
@@ -69,20 +74,20 @@ def generate_launch_description():
         }],
         output='screen'
     )
-    # Bridge the color and depth image topics with the more efficient
-    # image-specific bridge
+
+    # Efficient image-specific bridge for the two mono cameras
+    # (no depth images any more).
     ros_gz_image_bridge = Node(
         package='ros_gz_image',
         executable='image_bridge',
         arguments=[
             '/camera/front/image',
-            '/camera/front/depth_image',
             '/camera/rear/image',
-            '/camera/rear/depth_image',
-        ]
+        ],
+        parameters=[{'use_sim_time': True}],
+        output='screen'
     )
 
-    # Launch them all!
     return LaunchDescription([
         gz_resource_path,
         rsp,

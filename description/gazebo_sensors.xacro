@@ -1,136 +1,99 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <!-- =========================================== -->
-    <!-- ========== FRONT CAMERA SENSORS ============ -->
-    <!-- =========================================== -->
-    <gazebo reference="f_rgbd_link">
-        <sensor name="rgbd_camera" type="rgbd_camera">
-            <pose>0.05 0 0 0 0 0</pose>
-            <always_on>true</always_on>
-            <visualize>true</visualize>
-            <update_rate>20</update_rate>
-            <topic>camera/front</topic>
-            <gz_frame_id>f_rgbd_link</gz_frame_id>
-            <camera name="rgbd_camera">
-                <horizontal_fov>1.089</horizontal_fov>
-                <image>
-                    <width>640</width>
-                    <height>480</height>
-                    <format>R8G8B8</format>
-                </image>
-                <clip>
-                    <near>0.05</near>
-                    <far>20.0</far>
-                </clip>
-                <camera_info_topic>camera/front/camera_info</camera_info_topic>
-                <depth_camera>
+
+    <!-- Sensor set: 2x monocular camera (130 deg HFOV), 1x IMU, 1x GPS. Nothing else.
+         Requires in the world: Sensors (ogre2), Imu, NavSat systems, and
+         <spherical_coordinates> (see worlds/outdoor_flat.world). -->
+
+    <xacro:property name="cam_hfov" value="2.2689"/>   <!-- 130 deg in rad -->
+    <xacro:property name="cam_w" value="640"/>
+    <xacro:property name="cam_h" value="480"/>
+    <xacro:property name="cam_rate" value="20"/>
+
+    <!-- Plain rectilinear (pinhole) projection: no lens distortion is modeled,
+         so a 130 deg image is heavily stretched at the edges. Switch to a
+         distortion/fisheye model once the VSLAM framework is chosen. -->
+    <xacro:macro name="mono_camera" params="side link optical_link">
+        <gazebo reference="${link}">
+            <sensor name="${side}_camera" type="camera">
+                <pose>0.05 0 0 0 0 0</pose>
+                <always_on>true</always_on>
+                <visualize>false</visualize>
+                <update_rate>${cam_rate}</update_rate>
+                <topic>camera/${side}/image</topic>
+                <gz_frame_id>${optical_link}</gz_frame_id>
+                <camera name="${side}_camera">
+                    <horizontal_fov>${cam_hfov}</horizontal_fov>
+                    <image>
+                        <width>${cam_w}</width>
+                        <height>${cam_h}</height>
+                        <format>R8G8B8</format>
+                    </image>
                     <clip>
-                        <near>0.05</near>
-                        <far>10.0</far>
+                        <near>0.1</near>
+                        <far>100.0</far>
                     </clip>
-                </depth_camera>
-            </camera>
+                    <noise>
+                        <type>gaussian</type>
+                        <mean>0.0</mean>
+                        <stddev>0.007</stddev>
+                    </noise>
+                    <camera_info_topic>camera/${side}/camera_info</camera_info_topic>
+                </camera>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:mono_camera side="front" link="f_camera_link" optical_link="f_camera_optical_link"/>
+    <xacro:mono_camera side="rear"  link="r_camera_link" optical_link="r_camera_optical_link"/>
+
+    <!-- =========================================== -->
+    <!-- ==================== IMU ================== -->
+    <!-- =========================================== -->
+    <!-- Noise values are typical MEMS-grade starting points; replace with the
+         datasheet of the real IMU for the Jetson/VIO tuning. -->
+    <gazebo reference="imu_link">
+        <sensor name="imu" type="imu">
+            <always_on>true</always_on>
+            <visualize>false</visualize>
+            <update_rate>200</update_rate>
+            <topic>imu</topic>
+            <gz_frame_id>imu_link</gz_frame_id>
+            <imu>
+                <angular_velocity>
+                    <x><noise type="gaussian"><mean>0</mean><stddev>2e-4</stddev><bias_mean>7.5e-6</bias_mean><bias_stddev>8e-7</bias_stddev></noise></x>
+                    <y><noise type="gaussian"><mean>0</mean><stddev>2e-4</stddev><bias_mean>7.5e-6</bias_mean><bias_stddev>8e-7</bias_stddev></noise></y>
+                    <z><noise type="gaussian"><mean>0</mean><stddev>2e-4</stddev><bias_mean>7.5e-6</bias_mean><bias_stddev>8e-7</bias_stddev></noise></z>
+                </angular_velocity>
+                <linear_acceleration>
+                    <x><noise type="gaussian"><mean>0</mean><stddev>1.7e-2</stddev><bias_mean>0.1</bias_mean><bias_stddev>1e-3</bias_stddev></noise></x>
+                    <y><noise type="gaussian"><mean>0</mean><stddev>1.7e-2</stddev><bias_mean>0.1</bias_mean><bias_stddev>1e-3</bias_stddev></noise></y>
+                    <z><noise type="gaussian"><mean>0</mean><stddev>1.7e-2</stddev><bias_mean>0.1</bias_mean><bias_stddev>1e-3</bias_stddev></noise></z>
+                </linear_acceleration>
+            </imu>
         </sensor>
     </gazebo>
 
     <!-- =========================================== -->
-    <!-- =========== REAR CAMERA SENSOR ============ -->
+    <!-- ==================== GPS ================== -->
     <!-- =========================================== -->
-    <gazebo reference="r_rgbd_link">
-        <sensor name="camera2_rgbd" type="rgbd_camera">
-            <pose>0.05 0 0 0 0 0</pose>
+    <gazebo reference="gps_link">
+        <sensor name="navsat" type="navsat">
             <always_on>true</always_on>
-            <visualize>true</visualize>
-            <update_rate>20</update_rate>
-            <topic>camera/rear</topic>
-            <gz_frame_id>r_rgbd_link</gz_frame_id>
-            <camera name="rgbd_camera">
-                <horizontal_fov>1.089</horizontal_fov>
-                <image>
-                    <width>640</width>
-                    <height>480</height>
-                    <format>R8G8B8</format>
-                </image>
-                <clip>
-                    <near>0.05</near>
-                    <far>20.0</far>
-                </clip>
-                <camera_info_topic>camera/rear/camera_info</camera_info_topic>
-                <depth_camera>
-                    <clip>
-                        <near>0.05</near>
-                        <far>10.0</far>
-                    </clip>
-                </depth_camera>
-            </camera>
+            <update_rate>10</update_rate>
+            <topic>gps/fix</topic>
+            <gz_frame_id>gps_link</gz_frame_id>
+            <navsat>
+                <position_sensing>
+                    <horizontal>
+                        <noise type="gaussian"><mean>0</mean><stddev>1.0</stddev></noise>
+                    </horizontal>
+                    <vertical>
+                        <noise type="gaussian"><mean>0</mean><stddev>2.0</stddev></noise>
+                    </vertical>
+                </position_sensing>
+            </navsat>
         </sensor>
     </gazebo>
 
-    <!-- =========================================== -->
-    <!-- ========== FRONT LIDAR SENSOR ============= -->
-    <!-- =========================================== -->
-    <gazebo reference="f_lidar_link">
-        <sensor name="front_lidar" type="gpu_lidar">
-            <pose>0 0 0 0 0 0</pose>
-            <visualize>true</visualize>
-            <update_rate>10</update_rate>
-            <topic>lidar/front/scan</topic>
-            <gz_frame_id>f_lidar_link</gz_frame_id>
-            <lidar>
-                <scan>
-                    <horizontal>
-                        <samples>240</samples>
-                        <resolution>1</resolution>
-                        <min_angle>-2.193</min_angle>
-                        <max_angle>2.193</max_angle>
-                    </horizontal>
-                    <vertical>
-                        <samples>16</samples>
-                        <resolution>1</resolution>
-                        <min_angle>-0.1</min_angle>
-                        <max_angle>0.179</max_angle>
-                    </vertical>
-                </scan>
-                <range>
-                    <min>0.3</min>
-                    <max>12.0</max>
-                    <resolution>0.01</resolution>
-                </range>
-            </lidar>
-        </sensor>
-    </gazebo>
-    
-    <!-- =========================================== -->
-    <!-- ========== REAR LIDAR SENSOR =============== -->
-    <!-- =========================================== -->
-    <gazebo reference="r_lidar_link">
-        <sensor name="rear_lidar" type="gpu_lidar">
-            <pose>0 0 0 0 0 0</pose>
-            <visualize>true</visualize>
-            <update_rate>10</update_rate>
-            <topic>lidar/rear/scan</topic>
-            <gz_frame_id>r_lidar_link</gz_frame_id>
-            <lidar>
-                <scan>
-                    <horizontal>
-                        <samples>240</samples>
-                        <resolution>1</resolution>
-                        <min_angle>-2.193</min_angle>
-                        <max_angle>2.193</max_angle>
-                    </horizontal>
-                    <vertical>
-                        <samples>16</samples>
-                        <resolution>1</resolution>
-                        <min_angle>-0.1</min_angle>
-                        <max_angle>0.179</max_angle>
-                    </vertical>
-                </scan>
-                <range>
-                    <min>0.3</min>
-                    <max>12.0</max>
-                    <resolution>0.01</resolution>
-                </range>
-            </lidar>
-        </sensor>
-    </gazebo>
 </robot>

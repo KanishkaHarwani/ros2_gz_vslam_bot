@@ -1,23 +1,20 @@
-# Bridges gz-transport topics <-> ROS 2 topics.
-# Ignition Fortress + ros_gz_bridge (Humble). Type strings use gz.msgs.*,
-# which the bridge accepts as an alias for ignition.msgs.* on Humble.
+# Bridges gz-transport <-> ROS 2 (Gazebo Harmonic + ros_gz_bridge on Jazzy).
+# Camera IMAGES are not here: they go through ros_gz_image's image_bridge
+# (see launch_sim.launch.py). Only camera_info is bridged below.
 
-# =========================================================
-# CLOCK / STATE / ODOMETRY
-# =========================================================
-# published by Gazebo's clock
+# ---------------- CLOCK / STATE / ODOMETRY ----------------
 - ros_topic_name: "clock"
   gz_topic_name: "clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
-# published by the JointStatePublisher plugin
+
 - ros_topic_name: "joint_states"
   gz_topic_name: "joint_states"
   ros_type_name: "sensor_msgs/msg/JointState"
   gz_type_name: "gz.msgs.Model"
   direction: GZ_TO_ROS
-# published by the DiffDrive plugin
+
 - ros_topic_name: "odom"
   gz_topic_name: "odom"
   ros_type_name: "nav_msgs/msg/Odometry"
@@ -29,71 +26,35 @@
   ros_type_name: "tf2_msgs/msg/TFMessage"
   gz_type_name: "gz.msgs.Pose_V"
   direction: GZ_TO_ROS
-# subscribed to by the DiffDrive plugin
+
 - ros_topic_name: "cmd_vel"
   gz_topic_name: "cmd_vel"
   ros_type_name: "geometry_msgs/msg/Twist"
   gz_type_name: "gz.msgs.Twist"
   direction: ROS_TO_GZ
 
-# =========================================================
-# FRONT CAMERA (combined rgbd_camera sensor, topic base "/camera*")
-# =========================================================
+# ---------------- CAMERAS (camera_info only) ----------------
 - ros_topic_name: "camera/front/camera_info"
   gz_topic_name: "camera/front/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
 
-- ros_topic_name: "camera/front/points"
-  gz_topic_name: "camera/front/points"
-  ros_type_name: "sensor_msgs/msg/PointCloud2"
-  gz_type_name: "gz.msgs.PointCloudPacked"
-  direction: GZ_TO_ROS
-
-# =========================================================
-# REAR CAMERA (combined rgbd_camera sensor, topic base "/camera*")
-# =========================================================
- 
 - ros_topic_name: "camera/rear/camera_info"
   gz_topic_name: "camera/rear/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
 
-- ros_topic_name: "camera/rear/points"
-  gz_topic_name: "camera/rear/points"
-  ros_type_name: "sensor_msgs/msg/PointCloud2"
-  gz_type_name: "gz.msgs.PointCloudPacked"
+# ---------------- IMU / GPS ----------------
+- ros_topic_name: "imu"
+  gz_topic_name: "imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
   direction: GZ_TO_ROS
 
-# =========================================================
-# FRONT LIDAR (gpu_lidar sensor, topic base "lidar/front/scan")
-# =========================================================
-- ros_topic_name: "lidar/front/scan"
-  gz_topic_name: "lidar/front/scan"
-  ros_type_name: "sensor_msgs/msg/LaserScan"
-  gz_type_name: "gz.msgs.LaserScan"
-  direction: GZ_TO_ROS
-
-- ros_topic_name: "lidar/front/points"
-  gz_topic_name: "lidar/front/scan/points"
-  ros_type_name: "sensor_msgs/msg/PointCloud2"
-  gz_type_name: "gz.msgs.PointCloudPacked"
-  direction: GZ_TO_ROS
-
-
-# =========================================================
-# REAR LIDAR (gpu_lidar sensor, topic base "lidar/rear/scan")
-# =========================================================
-- ros_topic_name: "lidar/rear/scan"
-  gz_topic_name: "lidar/rear/scan"
-  ros_type_name: "sensor_msgs/msg/LaserScan"
-  gz_type_name: "gz.msgs.LaserScan"
-  direction: GZ_TO_ROS
-
-- ros_topic_name: "lidar/rear/points"
-  gz_topic_name: "lidar/rear/scan/points"
-  ros_type_name: "sensor_msgs/msg/PointCloud2"
-  gz_type_name: "gz.msgs.PointCloudPacked"
+- ros_topic_name: "gps/fix"
+  gz_topic_name: "gps/fix"
+  ros_type_name: "sensor_msgs/msg/NavSatFix"
+  gz_type_name: "gz.msgs.NavSat"
   direction: GZ_TO_ROS

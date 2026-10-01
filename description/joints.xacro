@@ -55,33 +55,49 @@
     </joint>
 
     <!-- =========================================== -->
-    <!-- ================ CAMERA JOINTS ============ -->
+    <!-- ================ MONO CAMERA JOINTS ============ -->
     <!-- =========================================== -->
-    <joint name="f_rgbd_joint" type="fixed">
+    <joint name="f_camera_joint" type="fixed">
         <origin xyz="0.6525 0.0 0.6625" rpy="0 0 0"/>
         <parent link="base_link"/>
-        <child link="f_rgbd_link"/>
+        <child link="f_camera_link"/>
     </joint>
 
-    <joint name="r_rgbd_joint" type="fixed">
+    <joint name="r_camera_joint" type="fixed">
         <origin xyz="-0.6525 0.0 0.6625" rpy="0 0 ${pi}"/>
         <parent link="base_link"/>
-        <child link="r_rgbd_link"/>
+        <child link="r_camera_link"/>
+    </joint>
+
+    <!-- Optical frames: sit at the lens (matches the 0.05 m sensor <pose> in
+         gazebo_sensors.xacro) with REP-103 axis rotation. -->
+    <joint name="f_camera_optical_joint" type="fixed">
+        <origin xyz="0.05 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+        <parent link="f_camera_link"/>
+        <child link="f_camera_optical_link"/>
+    </joint>
+    <joint name="r_camera_optical_joint" type="fixed">
+        <origin xyz="0.05 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+        <parent link="r_camera_link"/>
+        <child link="r_camera_optical_link"/>
     </joint>
 
     <!-- =========================================== -->
-    <!-- ================ LIDAR JOINTS ============= -->
+    <!-- ============== IMU + GPS JOINTS =========== -->
     <!-- =========================================== -->
-    <joint name="f_lidar_joint" type="fixed">
-        <origin xyz="0.55 0.0 0.74" rpy="0 0 0"/>
+    <!-- IMU near the whole-robot CoM (base_link inertial origin). -->
+    <joint name="imu_joint" type="fixed">
+        <origin xyz="0 0 0.486" rpy="0 0 0"/>
         <parent link="base_link"/>
-        <child link="f_lidar_link"/>
+        <child link="imu_link"/>
     </joint>
 
-    <joint name="r_lidar_joint" type="fixed">
-        <origin xyz="-0.55 0.0 0.74" rpy="0 0 ${pi}"/>
+    <!-- GPS antenna on top of the chassis (top face is z = 0.636), slightly
+         aft so it clears the cameras' view. -->
+    <joint name="gps_joint" type="fixed">
+        <origin xyz="-0.2 0 0.636" rpy="0 0 0"/>
         <parent link="base_link"/>
-        <child link="r_lidar_link"/>
+        <child link="gps_link"/>
     </joint>
 
 </robot>

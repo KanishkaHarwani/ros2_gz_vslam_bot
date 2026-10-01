@@ -17,20 +17,6 @@
             </geometry>
             <material name="desert_tan"/>
         </visual>
-        <visual>
-    	    <origin xyz="0.55 0.0 0.685" rpy="0 0 0"/>
-            <geometry>
-                <cylinder radius="0.05" length="0.1"/>
-            </geometry>
-            <material name="desert_tan"/>
-        </visual>
-         <visual>
-    	    <origin xyz="-0.55 0.0 0.685" rpy="0 0 0"/>
-            <geometry>
-                <cylinder radius="0.05" length="0.1"/>
-            </geometry>
-            <material name="desert_tan"/>
-        </visual>
         <collision>
             <origin xyz="0.000973 0.000007 0.486096" rpy="0 0 0"/>
             <geometry>
@@ -184,9 +170,9 @@
     </link>
     
     <!-- =========================================== -->
-    <!-- ========== FRONT RGBD CAMERA ============== -->
+    <!-- ========== FRONT MONO CAMERA ============== -->
     <!-- =========================================== -->
-    <link name="f_rgbd_link">
+    <link name="f_camera_link">
         <inertial>
             <origin xyz="0 0 0.0225" rpy="0 0 0"/>
             <mass value="0.5186547939422563"/>
@@ -219,9 +205,9 @@
     </link>
     
     <!-- =========================================== -->
-    <!-- =========== REAR RGBD CAMERA ============== -->
+    <!-- =========== REAR MONO CAMERA ============== -->
     <!-- =========================================== -->
-    <link name="r_rgbd_link">
+    <link name="r_camera_link">
         <inertial>
             <origin xyz="0 0 0.0225" rpy="0 0 0"/>
             <mass value="0.5186547939422562"/>
@@ -253,52 +239,38 @@
         </collision>
   </link>
 
+    <!-- Optical frames (REP-103: z forward, x right, y down). Empty frames;
+         images/camera_info are stamped with these so VSLAM gets the right axes. -->
+    <link name="f_camera_optical_link"/>
+    <link name="r_camera_optical_link"/>
+
     <!-- =========================================== -->
-    <!-- ========== FRONT LIVOX LIDAR ============== -->
+    <!-- ================== IMU ==================== -->
     <!-- =========================================== -->
-    <link name="f_lidar_link">
+    <link name="imu_link">
         <inertial>
-            <origin xyz="0 0 0.0375" rpy="0 0 0"/>
-            <mass value="1.0750137361502572"/>
-            <inertia ixx="0.001176" iyy="0.001176" izz="0.001344" ixy="0.0" iyz="0.0" ixz="0.0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.05"/>
+            <inertia ixx="1e-5" iyy="1e-5" izz="1e-5" ixy="0.0" iyz="0.0" ixz="0.0"/>
         </inertial>
-        <visual>
-            <origin xyz="0 0 0.0375" rpy="0 0 0"/>
-            <geometry>
-                <cylinder radius="0.05" length="0.075"/>
-            </geometry>
-            <material name="blue"/>
-        </visual>
-        <collision>
-            <origin xyz="0 0 0.0375" rpy="0 0 0"/>
-            <geometry>
-                <cylinder radius="0.05" length="0.075"/>
-            </geometry>
-        </collision>
     </link>
 
     <!-- =========================================== -->
-    <!-- =========== REAR LIVOX LIDAR =============== -->
+    <!-- ================== GPS ==================== -->
     <!-- =========================================== -->
-    <link name="r_lidar_link">
+    <link name="gps_link">
         <inertial>
-            <origin xyz="0 0 0.0375" rpy="0 0 0"/>
-            <mass value="1.0750137361502572"/>
-            <inertia ixx="0.001176" iyy="0.001176" izz="0.001344" ixy="0.0" iyz="0.0" ixz="0.0"/>
+            <origin xyz="0 0 0.01" rpy="0 0 0"/>
+            <mass value="0.1"/>
+            <inertia ixx="2e-5" iyy="2e-5" izz="2e-5" ixy="0.0" iyz="0.0" ixz="0.0"/>
         </inertial>
         <visual>
-            <origin xyz="0 0 0.0375" rpy="0 0 0"/>
+            <origin xyz="0 0 0.01" rpy="0 0 0"/>
             <geometry>
-                <cylinder radius="0.05" length="0.075"/>
+                <cylinder radius="0.04" length="0.02"/>
             </geometry>
-            <material name="blue"/>
+            <material name="red"/>
         </visual>
-        <collision>
-            <origin xyz="0 0 0.0375" rpy="0 0 0"/>
-            <geometry>
-                <cylinder radius="0.05" length="0.075"/>
-            </geometry>
-        </collision>
     </link>
 
 </robot>

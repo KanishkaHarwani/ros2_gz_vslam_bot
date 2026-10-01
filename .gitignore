@@ -4,3 +4,6 @@ log/
 __pycache__/
 *.pyc
 .vscode/
+
+# Personal notes / handoff docs (not published)
+docs-personal/
