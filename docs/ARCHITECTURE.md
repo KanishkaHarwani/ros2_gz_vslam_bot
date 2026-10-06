@@ -73,6 +73,11 @@ odom ──(DiffDrive)──► base_link ──┬─ {l,r}_{f,r}_wheel_link   
 | `/camera/rear/camera_info` | `sensor_msgs/CameraInfo` | sim → ROS | 20 Hz | camera |
 | `/imu` | `sensor_msgs/Imu` | sim → ROS | 200 Hz | IMU |
 | `/gps/fix` | `sensor_msgs/NavSatFix` | sim → ROS | 10 Hz | navsat |
+| `/cmd_vel_teleop` | `geometry_msgs/Twist` | joystick → mux | – | `teleop_twist_joy` (v2 only) |
+| `/cmd_vel_smoothed` | `geometry_msgs/Twist` | Jetson → mux | – | Nav2 `velocity_smoother` (v2 only) |
+
+In v2, `twist_mux` on the laptop merges the two command topics into `/cmd_vel`
+(joystick has priority). In v1 the joystick publishes `/cmd_vel` directly.
 
 Images use `ros_gz_image` rather than the generic bridge for efficiency; all
 other topics are listed in `config/gz_bridge.yaml`.
@@ -98,7 +103,7 @@ launch file extends with the parent of the installed package share directory.
 ### v1: single machine **(planned layout)**
 Simulation and all ROS nodes on one laptop. Default for development.
 
-### v2: laptop + Jetson **(planned)**
+### v2: laptop + Jetson **(scaffolded, unverified; see [DISTRIBUTED](DISTRIBUTED.md))**
 
 | Machine | Runs |
 |---|---|

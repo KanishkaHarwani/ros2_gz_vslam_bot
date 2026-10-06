@@ -36,10 +36,12 @@ target to keep simulation load manageable.
 | Variant | Where things run |
 |---|---|
 | **v1** | Everything on one laptop: simulation, perception, control |
-| **v2** | Laptop runs the simulation; a Jetson runs perception and control |
+| **v2** | Laptop runs the simulation, RViz and joystick; a Jetson runs Nav2 (perception to follow) |
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the interface between
-the two machines.
+v2 scaffolding lives in [`distributed/`](distributed/); see
+[`docs/DISTRIBUTED.md`](docs/DISTRIBUTED.md) and
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the interface between the
+two machines.
 
 ## Quick start
 
@@ -61,6 +63,7 @@ ros2_gz_vslam_bot/
 ├── config/          # gz_bridge.yaml
 ├── rviz/            # ros2_gz_vslam_bot.rviz (main RViz config)
 ├── worlds/          # outdoor_flat.world (+ more per test stage)
+├── distributed/     # v2: laptop + Jetson scripts, launch files, Nav2 params
 ├── docs/            # public documentation (this index below)
 ├── startup.sh       # one-command bring-up
 ├── package.xml
@@ -76,6 +79,7 @@ shape is described in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 |---|---|
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Robot model, frames, topics, launch flow, v1/v2 deployment |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | Staged test plan and open decisions (draft) |
+| [`docs/DISTRIBUTED.md`](docs/DISTRIBUTED.md) | Laptop + Jetson setup, run, verification |
 | [`docs/RUNBOOK.md`](docs/RUNBOOK.md) | Install, run, verify, troubleshoot |
 | [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md) | Open issues, caveats, resolved history |
 | `docs/test_logs/` | One dated log per test run |

@@ -7,3 +7,4 @@ __pycache__/
 
 # Personal notes / handoff docs (not published)
 docs-personal/
+distributed/network.env

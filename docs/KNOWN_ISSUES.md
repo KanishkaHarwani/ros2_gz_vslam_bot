@@ -26,6 +26,11 @@ Move items to "Resolved" (with the date and test log) when closed.
 | 17 | Launch | The spawn node can race `robot_description` on first boot | Re-run, or add a short delay if it becomes a problem |
 | 18 | Teleop | Joystick axis/button mapping is controller-specific | Re-check with `ros2 topic echo /joy` when changing controllers |
 | 19 | GUI | A Qt/QML segfault was seen once when closing Gazebo, correlated with software rendering | Low priority; does not affect a running sim |
+| 20 | v2 | The distributed scripts, `twist_mux` chain and Nav2 params are untested on real hardware. The Nav2 params were derived from the Jazzy branch of `nav2_bringup`; the installed version may differ | Run the verification checklist in [DISTRIBUTED](DISTRIBUTED.md) and diff against the installed `nav2_params.yaml` |
+| 21 | v2 | Nav2 has no obstacle input and no `map` frame: it plans in `odom` with inflation-only rolling costmaps | Expected until distance estimation and GPS/IMU/VIO fusion exist |
+| 22 | v2 | `ros_gz_image` may not publish `/compressed` topics on this install | Check `ros2 topic list \| grep compressed`; republish fallback in [DISTRIBUTED](DISTRIBUTED.md) |
+| 23 | v2 | `distributed/` is run by path because colcon cannot discover a package nested inside the root package | Restructure into sibling packages once Jetson-side nodes are written |
+| 24 | Nav2 | Costmap footprint is approximated from the URDF; the wheel collision spheres (r 0.225) extend beyond the visual wheels | Revisit with issue #3 |
 
 ## Environment notes
 
