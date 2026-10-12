@@ -2,8 +2,8 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ros2_gz_vslam_bot</name>
-  <version>0.0.1</version>
-  <description>a 4-wheeled robot to test visual SLAM</description>
+  <version>0.0.2</version>
+  <description>a small (&lt;50x35x25 cm) 2-wheel robot with a stereo camera, IMU and optional GPS to test visual SLAM in maze, indoor and warehouse worlds</description>
   <maintainer email="kanishk.harwani@gmail.com">Kanishka Harwani</maintainer>
   <license>MIT</license>
 
@@ -14,6 +14,9 @@
   <exec_depend>ros_gz_sim</exec_depend>
   <exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>ros_gz_image</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>joy</exec_depend>
+  <exec_depend>teleop_twist_joy</exec_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
