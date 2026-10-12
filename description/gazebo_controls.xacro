@@ -1,30 +1,27 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
     <gazebo>
-        <!-- Harmonic naming: gz-sim-*-system / gz::sim::systems::* -->
-        <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+        <plugin filename="libignition-gazebo-diff-drive-system.so" name="ignition::gazebo::systems::DiffDrive">
 
-            <!-- Wheel joints: two per side for the 4-wheel skid-steer -->
-            <left_joint>l_f_wheel_joint</left_joint>
-            <left_joint>l_r_wheel_joint</left_joint>
-            <right_joint>r_f_wheel_joint</right_joint>
-            <right_joint>r_r_wheel_joint</right_joint>
+            <!-- True 2-wheel differential drive (front caster is passive) -->
+            <left_joint>l_wheel_joint</left_joint>
+            <right_joint>r_wheel_joint</right_joint>
 
-            <!-- Wheel geometry -->
-            <wheel_separation>0.874</wheel_separation>
-            <wheel_radius>0.225</wheel_radius>
+            <!-- Wheel geometry (shared with properties.xacro) -->
+            <wheel_separation>${wheel_separation}</wheel_separation>
+            <wheel_radius>${wheel_radius}</wheel_radius>
 
-            <max_linear_acceleration>0.5</max_linear_acceleration>
-            <min_linear_acceleration>-0.5</min_linear_acceleration>
-            <max_angular_acceleration>1</max_angular_acceleration>
-            <min_angular_acceleration>-1</min_angular_acceleration>
-            <max_linear_velocity>2</max_linear_velocity>
-            <min_linear_velocity>-2</min_linear_velocity>
-            <max_angular_velocity>1</max_angular_velocity>
-            <min_angular_velocity>-1</min_angular_velocity>
+            <!-- Limits scaled for a small indoor robot -->
+            <max_linear_acceleration>1.0</max_linear_acceleration>
+            <min_linear_acceleration>-1.0</min_linear_acceleration>
+            <max_angular_acceleration>2.0</max_angular_acceleration>
+            <min_angular_acceleration>-2.0</min_angular_acceleration>
+            <max_linear_velocity>1.0</max_linear_velocity>
+            <min_linear_velocity>-1.0</min_linear_velocity>
+            <max_angular_velocity>2.0</max_angular_velocity>
+            <min_angular_velocity>-2.0</min_angular_velocity>
 
-            <!-- Output (wheel odometry; whether it is fused or discarded is
-                 still an open decision, pending the sensor-set question) -->
+            <!-- Output -->
             <odom_publish_frequency>50</odom_publish_frequency>
             <topic>cmd_vel</topic>
             <odom_topic>odom</odom_topic>
@@ -33,7 +30,7 @@
             <child_frame_id>base_link</child_frame_id>
 
         </plugin>
-        <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <plugin filename="libignition-gazebo-joint-state-publisher-system.so" name="ignition::gazebo::systems::JointStatePublisher">
             <topic>joint_states</topic>
         </plugin>
     </gazebo>

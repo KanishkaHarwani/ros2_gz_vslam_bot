@@ -1,7 +1,7 @@
 # Runbook — ros2_gz_vslam_bot (Ignition Fortress + ROS 2 Humble)
 
-Commands assume ROS 2 Humble and Ignition Fortress are already installed
-system-wide, and your workspace is at `~/ros2_ws` (adjust paths as needed).
+Commands assume ROS 2 Humble and Ignition Fortress are installed system-wide
+and your workspace is at `~/ros2_ws` (adjust paths as needed).
 
 ---
 
@@ -17,31 +17,20 @@ sudo apt install -y \
   ros-humble-ros-gz-image \
   ros-humble-robot-state-publisher \
   ros-humble-xacro \
-  ros-humble-rviz2
+  ros-humble-rviz2 \
+  ros-humble-joy \
+  ros-humble-teleop-twist-joy
 ```
 
-### 1.2 Place the package in your workspace
+### 1.2 Place the package and build
 ```bash
 cd ~/ros2_ws/src
-# copy or clone ros2_gz_vslam_bot here so the tree looks like:
-# ~/ros2_ws/src/ros2_gz_vslam_bot/{package.xml, CMakeLists.txt, description/, launch/, config/, worlds/}
-```
-
-### 1.3 Confirm mesh files are in place
-```bash
-ls ~/ros2_ws/src/ros2_gz_vslam_bot/description/meshes/
-# Expect: base_link.stl, left_front_wheel_link.stl, right_front_wheel_link.stl,
-# left_rear_wheel_link.stl, right_rear_wheel_link.stl, front_bumper_link.stl,
-# front_rgbd_camera_link.stl, rear_rgbd_camera_link.stl,
-# front_livox_lidar_link.stl, rear_livox_lidar_link.stl
-```
-
-### 1.4 Resolve dependencies and build
-```bash
+# ros2_gz_vslam_bot/{package.xml, CMakeLists.txt, description/, launch/, config/, worlds/, scripts/}
 cd ~/ros2_ws
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --packages-select ros2_gz_vslam_bot
 ```
+There are no mesh files; no `description/meshes/` folder is needed.
 
 ---
 
@@ -54,100 +43,107 @@ source ~/ros2_ws/install/setup.bash
 ```
 
 ### 2.2 Launch the full sim stack
-This one command starts `robot_state_publisher`, gz-sim with your world,
-spawns the robot, and starts the ROS↔Gazebo bridge:
 ```bash
-ros2 launch ros2_gz_vslam_bot launch_sim.launch.py
+ros2 launch ros2_gz_vslam_bot launch_sim.launch.py \
+  world:=empty.world stereo_mode:=stereo enable_gps:=false
+```
+Or everything (sim + RViz + joystick teleop) in one go:
+```bash
+./start_sim.sh [world] [stereo|mono] [gps|nogps]
 ```
 
-If gz-sim opens with an empty world and no robot, wait a few seconds —
-`robot_description` needs to publish before the `create` node can spawn
-against it; a race here is normal on first boot.
+| Argument | Values | Effect |
+|---|---|---|
+| `world` | file in `worlds/`, or an absolute path | default `empty.world` |
+| `stereo_mode` | `stereo` / `mono` | `mono` removes the right camera |
+| `enable_gps` | `false` / `true` | `true` adds `/navsat` (outdoor worlds only) |
+
+If gz-sim opens with an empty world and no robot, wait a few seconds:
+`robot_description` must publish before the `create` node can spawn.
 
 ---
 
-## 3. Verifying it's actually working
-
-Open new terminals (each needs step 2.1 sourced) and check:
+## 3. Verifying it's working
 
 ### 3.1 Gazebo-side topics
+Use `ign topic -l` (on this machine `gz topic -l` can wrongly report "not running"):
 ```bash
-gz topic -l | grep -E "camera|lidar|odom|cmd_vel"
+ign topic -l | grep -E "camera|imu|navsat|odom|cmd_vel"
 ```
-Confirm you see `camera/front/*`, `camera/rear/*`, `lidar/front/scan`,
-`lidar/front/scan/points`, `lidar/rear/scan`, `lidar/rear/scan/points`.
 
-### 3.2 ROS-side topics (after the bridge)
+### 3.2 ROS-side topics and rates
 ```bash
 ros2 topic list
-```
-Confirm `/odom`, `/tf`, `/joint_states`, `/camera/front/image`,
-`/camera/front/points`, `/lidar/front/scan`, `/lidar/front/points`, etc.
-all appear.
-
-### 3.3 Sanity-check odometry
-```bash
+ros2 topic hz /camera/left/image      # ~30 Hz
+ros2 topic hz /camera/right/image     # ~30 Hz (stereo mode only)
+ros2 topic hz /imu                    # ~100 Hz
 ros2 topic echo /odom --once
+ros2 topic echo /navsat --once        # only with enable_gps:=true
 ```
 
-### 3.4 Sanity-check a lidar scan
+### 3.3 Check the toggles took effect
 ```bash
-ros2 topic echo /lidar/front/scan --once
+ros2 topic list | grep camera/right   # empty in mono mode
+ros2 topic list | grep navsat         # empty unless enable_gps:=true
 ```
+(`/navsat` or `/camera/right/*` can appear in the topic list as an empty
+bridge endpoint; `ros2 topic hz` showing no data is the real test.)
 
 ---
 
 ## 4. Driving the robot
 
-### 4.1 One-off velocity command
 ```bash
 ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \
   "{linear: {x: 0.3}, angular: {z: 0.0}}"
-```
 
-### 4.2 Keyboard teleop (if installed)
-```bash
 sudo apt install -y ros-humble-teleop-twist-keyboard   # one-time
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
+Robot limits: 1.0 m/s linear, 2.0 rad/s angular.
 
 ---
 
 ## 5. Visualizing in RViz2
 
 ```bash
-rviz2 -d ~/ros2_ws/src/ros2_gz_vslam_bot/config/view_bot.rviz
+rviz2 -d ~/ros2_ws/install/ros2_gz_vslam_bot/share/ros2_gz_vslam_bot/config/view_bot.rviz
 ```
-(Adjust the path if `view_bot.rviz` ends up somewhere other than `config/`
-in your final layout — see the open question in section 6.)
-
-Fixed Frame is set to `odom`; enable/disable the point cloud and image
-displays from the Displays panel as needed — they're off by default to
-keep initial render load light.
+Fixed Frame is `odom`. Shows the robot model, TF, and both camera images
+(the right image panel stays empty in mono mode).
 
 ---
 
-## 6. Known open items (not yet resolved in this conversation)
+## 6. Checking the robot's size budget
 
-- **`gz_bridge.yaml` location**: referenced throughout as `config/gz_bridge.yaml`
-  per the README's suggested structure — confirm this matches where the
-  file actually sits in your repo, or `launch_sim.launch.py`'s bridge node
-  won't find it.
-- **World staging**: `worlds/empty.world` only covers Stage 0 / Test 1–4
-  (flat ground, no obstacles). Tests 5 onward in `Roadmap.md` need
-  obstacle worlds; Test 8 needs rough terrain — neither exists yet.
-- **4-wheel diff-drive approximation**: `gazebo_controls.xacro`'s DiffDrive
-  plugin treats front+rear wheels per side as one "side" — no true
-  independent 4-wheel skid-steer physics. Flagged in your own README as
-  an open decision; revisit if Test 2's odometry-drift baseline looks off.
+After editing `description/properties.xacro`:
+```bash
+python3 scripts/check_envelope.py
+python3 scripts/check_envelope.py enable_gps:=true enable_right_camera:=false
+```
+Fails (exit 1) if the robot exceeds 50x35x25 cm or the CoM leaves the
+wheels+caster support triangle.
 
 ---
 
-## 7. Troubleshooting quick reference
+## 7. Known open items
+
+- **Worlds:** only `worlds/empty.world` exists. Maze, indoor and warehouse
+  worlds are still to be built (copy its system plugins).
+- **Ground truth:** Gazebo pose publisher not yet wired up (needed for Test 2).
+- **Not yet run in Gazebo:** this description was validated with xacro and a
+  geometric check, not yet launched. First launch may need friction/damping
+  tuning of the caster and wheels.
+
+---
+
+## 8. Troubleshooting quick reference
 
 | Symptom | Likely cause |
 |---|---|
-| Robot doesn't spawn / gz-sim errors on mesh load | `package://` path mismatch — confirm `ros2_gz_vslam_bot` resolves via `ros2 pkg prefix ros2_gz_vslam_bot` and meshes are under `description/meshes/` |
-| No camera/lidar data on any topic | Sensors system plugin missing `ogre2` render engine, or bridge node not running — check `gz topic -l` first to isolate Gazebo-side vs. bridge-side |
-| Robot doesn't move on `/cmd_vel` | Check wheel joint names in `gazebo_controls.xacro` match `joints.xacro` exactly (`l_f_wheel_joint`, etc.) |
-| RViz shows nothing under Fixed Frame `odom` | `/tf` not bridging — check `gz_bridge.yaml` has the `tf` entry and `gz topic -l` shows `/tf` being published |
+| No camera data | Sensors plugin missing `ogre2` in the world, or `image_bridge` not running; check `ign topic -l` first to separate Gazebo-side from bridge-side |
+| No `/imu` data | World is missing the `ignition::gazebo::systems::Imu` plugin |
+| No `/navsat` data | `enable_gps:=true` not set, or world lacks the NavSat plugin / `<spherical_coordinates>` |
+| Robot doesn't move on `/cmd_vel` | Joint names in `gazebo_controls.xacro` (`l_wheel_joint`, `r_wheel_joint`) must match `joints.xacro` |
+| Robot tips forward/back or drags | Check caster friction (`gazebo_materials.xacro`) and that `check_envelope.py` reports CoM inside the support triangle |
+| RViz shows nothing under Fixed Frame `odom` | `/tf` not bridging; check `gz_bridge.yaml` has the `tf` entry |

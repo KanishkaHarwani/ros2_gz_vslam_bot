@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- =====================================================================
+         SINGLE SOURCE OF TRUTH FOR ROBOT GEOMETRY
+
+         Envelope budget (hard limit, including wheels, camera, IMU, GPS):
+             L 0.50 m  x  W 0.35 m  x  H 0.25 m
+         Verify after any change with:  scripts/check_envelope.py
+
+         Frame convention: base_link sits at the MIDPOINT OF THE DRIVE AXLE
+         (so DiffDrive odometry is about the point the robot pivots around).
+         +X forward, +Y left, +Z up. Ground is at z = -wheel_radius.
+         ===================================================================== -->
+
+    <!-- Chassis -->
+    <xacro:property name="chassis_length" value="0.36"/>
+    <xacro:property name="chassis_width"  value="0.22"/>
+    <xacro:property name="chassis_height" value="0.08"/>
+    <xacro:property name="chassis_mass"   value="2.5"/>
+    <xacro:property name="chassis_clearance" value="0.04"/>   <!-- chassis underside above ground -->
+    <xacro:property name="chassis_x"      value="0.04"/>      <!-- chassis centre ahead of the axle -->
+    <xacro:property name="chassis_z"      value="${chassis_clearance - wheel_radius + chassis_height/2}"/>
+    <xacro:property name="chassis_top_z"  value="${chassis_z + chassis_height/2}"/>
+
+    <!-- Drive wheels -->
+    <xacro:property name="wheel_radius" value="0.06"/>
+    <xacro:property name="wheel_width"  value="0.035"/>
+    <xacro:property name="wheel_mass"   value="0.4"/>
+    <xacro:property name="wheel_y"      value="0.14"/>        <!-- centre of wheel, each side -->
+    <xacro:property name="wheel_separation" value="${2*wheel_y}"/>
+
+    <!-- Front ball caster -->
+    <xacro:property name="caster_radius" value="0.02"/>
+    <xacro:property name="caster_mass"   value="0.05"/>
+    <xacro:property name="caster_x"      value="0.17"/>
+    <xacro:property name="caster_z"      value="${-wheel_radius + caster_radius}"/>
+
+    <!-- Stereo camera bar (front, on top of chassis) -->
+    <xacro:property name="stereo_baseline" value="0.12"/>
+    <xacro:property name="bar_x"      value="0.195"/>
+    <xacro:property name="bar_z"      value="${chassis_top_z + 0.015}"/>
+    <xacro:property name="bar_length" value="0.15"/>
+    <xacro:property name="cam_dx"     value="0.015"/>         <!-- camera forward of bar centre -->
+
+    <!-- IMU (inside chassis, close to the axle) -->
+    <xacro:property name="imu_x" value="0.0"/>
+    <xacro:property name="imu_z" value="${chassis_z}"/>
+
+    <!-- GPS puck on a short post, rear of chassis top -->
+    <xacro:property name="gps_x"    value="-0.08"/>
+    <xacro:property name="gps_post" value="0.03"/>
+    <xacro:property name="gps_z"    value="${chassis_top_z + gps_post + 0.005}"/>
+
+    <!-- Sensor settings -->
+    <xacro:property name="camera_rate"   value="30"/>
+    <xacro:property name="camera_width"  value="640"/>
+    <xacro:property name="camera_height" value="480"/>
+    <xacro:property name="camera_hfov"   value="1.089"/>
+    <xacro:property name="camera_noise_stddev" value="0.007"/>
+    <xacro:property name="imu_rate"      value="100"/>
+    <xacro:property name="gps_rate"      value="5"/>
+    <!-- GUI render overhead only; no effect on published data -->
+    <xacro:property name="sensor_visualize" value="false"/>
+
+    <!-- =====================================================================
+         Inertia helper macros
+         ===================================================================== -->
+    <xacro:macro name="box_inertia" params="m x y z">
+        <inertia ixx="${m/12*(y*y+z*z)}" ixy="0" ixz="0"
+                 iyy="${m/12*(x*x+z*z)}" iyz="0"
+                 izz="${m/12*(x*x+y*y)}"/>
+    </xacro:macro>
+
+    <!-- Cylinder whose axis is the link's Y axis (wheels) -->
+    <xacro:macro name="wheel_inertia" params="m r w">
+        <inertia ixx="${m/12*(3*r*r+w*w)}" ixy="0" ixz="0"
+                 iyy="${m*r*r/2}" iyz="0"
+                 izz="${m/12*(3*r*r+w*w)}"/>
+    </xacro:macro>
+
+    <!-- Cylinder whose axis is the link's Z axis (GPS puck) -->
+    <xacro:macro name="cylinder_z_inertia" params="m r h">
+        <inertia ixx="${m/12*(3*r*r+h*h)}" ixy="0" ixz="0"
+                 iyy="${m/12*(3*r*r+h*h)}" iyz="0"
+                 izz="${m*r*r/2}"/>
+    </xacro:macro>
+
+    <xacro:macro name="sphere_inertia" params="m r">
+        <inertia ixx="${2*m*r*r/5}" ixy="0" ixz="0"
+                 iyy="${2*m*r*r/5}" iyz="0"
+                 izz="${2*m*r*r/5}"/>
+    </xacro:macro>
+
+</robot>

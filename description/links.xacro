@@ -1,275 +1,165 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- All visuals/collisions are primitives, so the package no longer needs
+         any STL meshes (and the IGN_GAZEBO_RESOURCE_PATH workaround is gone). -->
+
     <!-- =========================================== -->
-    <!-- =============== CHASSIS ================= -->
+    <!-- ================ CHASSIS ================== -->
     <!-- =========================================== -->
     <link name="base_link">
         <inertial>
-            <origin xyz="0.000973 0.000007 0.486096" rpy="0 0 0"/>
-      	    <mass value="185.1322568023575"/>
-      	    <inertia ixx="11.056144" iyy="30.914741" izz="38.217336" ixy="0.00074" ixz="0.00702" iyz="-0.000207"/>
-    	</inertial>
-    	<visual>
-    	    <origin xyz="0.000973 0.000007 0.486096" rpy="0 0 0"/>
+            <origin xyz="${chassis_x} 0 ${chassis_z}" rpy="0 0 0"/>
+            <mass value="${chassis_mass}"/>
+            <xacro:box_inertia m="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z="${chassis_height}"/>
+        </inertial>
+        <visual>
+            <origin xyz="${chassis_x} 0 ${chassis_z}" rpy="0 0 0"/>
             <geometry>
-                <box size="1.35 0.75 0.30"/>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
             </geometry>
             <material name="desert_tan"/>
         </visual>
         <collision>
-            <origin xyz="0.000973 0.000007 0.486096" rpy="0 0 0"/>
+            <origin xyz="${chassis_x} 0 ${chassis_z}" rpy="0 0 0"/>
             <geometry>
-                <box size="1.35 0.75 0.30"/>
-            </geometry>
-        </collision>
-    </link>
-    
-    <!-- =========================================== -->
-    <!-- =========== LEFT-FRONT WHEEL ============== -->
-    <!-- =========================================== -->
-    <link name="l_f_wheel_link">
-        <inertial>
-            <origin xyz="0 0.11207 0" rpy="0 0 0"/>
-            <mass value="7.511940733814897"/>
-            <inertia ixx="0.104634" iyy="0.189223" izz="0.104634" ixy="0.0" iyz="0.0" ixz="0.0"/>
-        </inertial>
-        <visual>
-            <origin xyz="0 0.11207 0" rpy="1.5708 0 0"/>
-            <geometry>
-                <cylinder radius="0.225" length="0.125"/>
-            </geometry>
-            <material name="black"/>
-        </visual>
-        <collision>
-            <origin xyz="0 0.11207 0" rpy="1.5708 0 0"/>
-            <geometry>
-                <sphere radius="0.225"/>
-            </geometry>
-        </collision>
-    </link>
-    
-    <!-- =========================================== -->
-    <!-- =========== RIGHT_FRONT WHEEL ============= -->
-    <!-- =========================================== -->
-    <link name="r_f_wheel_link">
-        <inertial>
-            <origin xyz="0 -0.11207 0" rpy="0 0 0"/>
-            <mass value="7.511940733814895"/>
-            <inertia ixx="0.104634" iyy="0.189223" izz="0.104634" ixy="0.0" iyz="0.0" ixz="0.0"/>
-        </inertial>
-        <visual>
-            <origin xyz="0 -0.11207 0" rpy="1.5708 0 0"/>
-            <geometry>
-                <cylinder radius="0.225" length="0.125"/>
-            </geometry>
-            <material name="black"/>
-        </visual>
-        <collision>
-            <origin xyz="0 -0.11207 0" rpy="1.5708 0 0"/>
-            <geometry>
-                <sphere radius="0.225"/>
-            </geometry>
-        </collision>
-    </link>
-    
-    <!-- =========================================== -->
-    <!-- =========== LEFT-REAR WHEEL =============== -->
-    <!-- =========================================== -->
-    <link name="l_r_wheel_link">
-        <inertial>
-            <origin xyz="0 0.11207 0" rpy="0 0 0"/>
-            <mass value="7.511940733814895"/>
-            <inertia ixx="0.104634" iyy="0.189223" izz="0.104634" ixy="0.0" iyz="0.0" ixz="0.0"/>
-        </inertial>
-        <visual>
-            <origin xyz="0 0.11207 0" rpy="1.5708 0 0"/>
-            <geometry>
-                <cylinder radius="0.225" length="0.125"/>
-            </geometry>
-            <material name="black"/>
-        </visual>
-        <collision>
-            <origin xyz="0 0.11207 0" rpy="1.5708 0 0"/>
-            <geometry>
-                <sphere radius="0.225"/>
-            </geometry>
-        </collision>
-    </link>
-    
-    <!-- =========================================== -->
-    <!-- =========== RIGHT_REAR WHEEL ============== -->
-    <!-- =========================================== -->
-    <link name="r_r_wheel_link">
-        <inertial>
-            <origin xyz="0 -0.11207 0" rpy="0 0 0"/>
-            <mass value="7.511940733814895"/>
-            <inertia ixx="0.104634" iyy="0.189223" izz="0.104634" ixy="0.0" iyz="0.0" ixz="0.0"/>
-        </inertial>
-        <visual>
-            <origin xyz="0 -0.11207 0" rpy="1.5708 0 0"/>
-            <geometry>
-                <cylinder radius="0.225" length="0.125"/>
-            </geometry>
-            <material name="black"/>
-        </visual>
-        <collision>
-            <origin xyz="0 -0.11207 0" rpy="1.5708 0 0"/>
-            <geometry>
-                <sphere radius="0.225"/>
-            </geometry>
-        </collision>
-    </link>
-    
-    <!-- =========================================== -->
-    <!-- ============= FRONT BUMPER ================ -->
-    <!-- =========================================== -->
-    <link name="front_bumper_link">
-        <inertial>
-            <origin xyz="0.071440 -0.225000 -0.018717" rpy="0 0 0"/>
-            <mass value="13.822332678327909"/>
-            <inertia ixx="1.050773" iyy="0.249928" izz="0.823861" ixy="0.0" iyz="0.0" ixz="0.000988"/>
-        </inertial>
-        <visual>
-            <origin xyz="0.071440 -0.225000 -0.018717" rpy="0 0 0"/>
-            <geometry>
-                <box size="0.12 0.95 0.3"/>
-            </geometry>
-            <material name="white"/>
-        </visual>
-        <collision>
-            <origin xyz="0.071440 -0.225000 -0.018717" rpy="0 0 0"/>
-            <geometry>
-                <box size="0.12 0.95 0.3"/>
+                <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
             </geometry>
         </collision>
     </link>
 
     <!-- =========================================== -->
-    <!-- ============= REAR BUMPER ================= -->
+    <!-- ================= WHEELS ================== -->
     <!-- =========================================== -->
-    <link name="rear_bumper_link">
+    <!-- Wheel frame origin is the wheel centre (no inner-face offset). -->
+    <xacro:macro name="wheel" params="prefix">
+        <link name="${prefix}_wheel_link">
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="${wheel_mass}"/>
+                <xacro:wheel_inertia m="${wheel_mass}" r="${wheel_radius}" w="${wheel_width}"/>
+            </inertial>
+            <visual>
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+                </geometry>
+                <material name="black"/>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+                </geometry>
+            </collision>
+        </link>
+    </xacro:macro>
+
+    <xacro:wheel prefix="l"/>
+    <xacro:wheel prefix="r"/>
+
+    <!-- =========================================== -->
+    <!-- ============== FRONT CASTER =============== -->
+    <!-- =========================================== -->
+    <link name="caster_link">
         <inertial>
-            <origin xyz="-0.071440 -0.225000 -0.018717" rpy="0 0 0"/>
-            <mass value="13.822332678327909"/>
-            <inertia ixx="1.050773" iyy="0.249928" izz="0.823861" ixy="0.0" iyz="0.0" ixz="-0.000988"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="${caster_mass}"/>
+            <xacro:sphere_inertia m="${caster_mass}" r="${caster_radius}"/>
         </inertial>
         <visual>
-            <origin xyz="-0.071440 -0.225000 -0.018717" rpy="0 0 0"/>
             <geometry>
-                <box size="0.12 0.95 0.3"/>
+                <sphere radius="${caster_radius}"/>
             </geometry>
-            <material name="white"/>
+            <material name="gray"/>
         </visual>
         <collision>
-            <origin xyz="-0.071440 -0.225000 -0.018717" rpy="0 0 0"/>
             <geometry>
-                <box size="0.12 0.95 0.3"/>
+                <sphere radius="${caster_radius}"/>
             </geometry>
         </collision>
     </link>
-    
+
     <!-- =========================================== -->
-    <!-- ========== FRONT MONO CAMERA ============== -->
+    <!-- ============= STEREO CAMERA BAR =========== -->
     <!-- =========================================== -->
-    <link name="f_camera_link">
+    <link name="stereo_bar_link">
         <inertial>
-            <origin xyz="0 0 0.0225" rpy="0 0 0"/>
-            <mass value="0.5186547939422563"/>
-            <inertia ixx="0.000946" iyy="0.00017" izz="0.000952" ixy="0.0" iyz="0.0" ixz="0.0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.15"/>
+            <xacro:box_inertia m="0.15" x="0.03" y="${bar_length}" z="0.03"/>
         </inertial>
         <visual>
             <geometry>
-                <box size="0.05 0.05 0.05"/>
+                <box size="0.03 ${bar_length} 0.03"/>
             </geometry>
-            <material name="green"/>
+            <material name="gray"/>
         </visual>
-        <visual>
-            <origin xyz="0.035 0 0" rpy="0 ${pi/2} 0"/>
-            <geometry>
-                <cylinder radius="0.015" length="0.02"/>
-            </geometry>
-            <material name="green"/>
-        </visual>
-        <collision>
-            <geometry>
-                <box size="0.05 0.05 0.05"/>
-            </geometry>
-        </collision>
-        <collision>
-            <origin xyz="0.035 0 0" rpy="0 ${pi/2} 0"/>
-            <geometry>
-                <cylinder radius="0.015" length="0.02"/>
-            </geometry>
-        </collision>
     </link>
-    
-    <!-- =========================================== -->
-    <!-- =========== REAR MONO CAMERA ============== -->
-    <!-- =========================================== -->
-    <link name="r_camera_link">
-        <inertial>
-            <origin xyz="0 0 0.0225" rpy="0 0 0"/>
-            <mass value="0.5186547939422562"/>
-            <inertia ixx="0.000946" iyy="0.00017" izz="0.000952" ixy="0.0" iyz="0.0" ixz="0.0"/>
-        </inertial>
-        <visual>
-            <geometry>
-                <box size="0.05 0.05 0.05"/>
-            </geometry>
-            <material name="green"/>
-        </visual>
-        <visual>
-            <origin xyz="0.035 0 0" rpy="0 ${pi/2} 0"/>
-            <geometry>
-                <cylinder radius="0.015" length="0.02"/>
-            </geometry>
-            <material name="green"/>
-        </visual>
-        <collision>
-            <geometry>
-                <box size="0.05 0.05 0.05"/>
-            </geometry>
-        </collision>
-        <collision>
-            <origin xyz="0.035 0 0" rpy="0 ${pi/2} 0"/>
-            <geometry>
-                <cylinder radius="0.015" length="0.02"/>
-            </geometry>
-        </collision>
-  </link>
 
-    <!-- Optical frames (REP-103: z forward, x right, y down). Empty frames;
-         images/camera_info are stamped with these so VSLAM gets the right axes. -->
-    <link name="f_camera_optical_link"/>
-    <link name="r_camera_optical_link"/>
+    <xacro:macro name="camera_link" params="side">
+        <link name="cam_${side}_link">
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.05"/>
+                <xacro:box_inertia m="0.05" x="0.02" y="0.03" z="0.03"/>
+            </inertial>
+            <visual>
+                <geometry>
+                    <box size="0.02 0.03 0.03"/>
+                </geometry>
+                <material name="green"/>
+            </visual>
+        </link>
+        <!-- Optical frame (REP-103: z forward, x right, y down). Image and
+             camera_info headers use this frame. -->
+        <link name="cam_${side}_optical_frame"/>
+    </xacro:macro>
+
+    <xacro:camera_link side="left"/>
+    <xacro:camera_link side="right"/>
 
     <!-- =========================================== -->
-    <!-- ================== IMU ==================== -->
+    <!-- ==================== IMU ================== -->
     <!-- =========================================== -->
     <link name="imu_link">
         <inertial>
             <origin xyz="0 0 0" rpy="0 0 0"/>
-            <mass value="0.05"/>
-            <inertia ixx="1e-5" iyy="1e-5" izz="1e-5" ixy="0.0" iyz="0.0" ixz="0.0"/>
+            <mass value="0.02"/>
+            <xacro:box_inertia m="0.02" x="0.03" y="0.02" z="0.005"/>
         </inertial>
+        <visual>
+            <geometry>
+                <box size="0.03 0.02 0.005"/>
+            </geometry>
+            <material name="red"/>
+        </visual>
     </link>
 
     <!-- =========================================== -->
-    <!-- ================== GPS ==================== -->
+    <!-- ==================== GPS ================== -->
     <!-- =========================================== -->
+    <!-- The antenna hardware is always part of the robot (so the size budget
+         is always checked with it). Only the *sensor* is toggled, via the
+         enable_gps xacro arg. -->
     <link name="gps_link">
         <inertial>
-            <origin xyz="0 0 0.01" rpy="0 0 0"/>
-            <mass value="0.1"/>
-            <inertia ixx="2e-5" iyy="2e-5" izz="2e-5" ixy="0.0" iyz="0.0" ixz="0.0"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.05"/>
+            <xacro:cylinder_z_inertia m="0.05" r="0.02" h="0.01"/>
         </inertial>
         <visual>
-            <origin xyz="0 0 0.01" rpy="0 0 0"/>
             <geometry>
-                <cylinder radius="0.04" length="0.02"/>
+                <cylinder radius="0.02" length="0.01"/>
             </geometry>
-            <material name="red"/>
+            <material name="blue"/>
+        </visual>
+        <visual>
+            <origin xyz="0 0 ${-(gps_post/2 + 0.005)}" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.005" length="${gps_post}"/>
+            </geometry>
+            <material name="gray"/>
         </visual>
     </link>
 

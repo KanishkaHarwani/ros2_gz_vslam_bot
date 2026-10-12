@@ -2,100 +2,69 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- =========================================== -->
-    <!-- ================ WHEEL JOINTS ============= -->
+    <!-- ============== DRIVE WHEELS =============== -->
     <!-- =========================================== -->
-    <joint name="l_f_wheel_joint" type="continuous">
-        <origin xyz="0.45 0.325 0.225" rpy="0 0 0"/>
+    <joint name="l_wheel_joint" type="continuous">
+        <origin xyz="0 ${wheel_y} 0" rpy="0 0 0"/>
         <parent link="base_link"/>
-        <child link="l_f_wheel_link"/>
-        <axis xyz="0.0 1.0 0.0"/>
-        <dynamics damping="1.0" friction="0.1"/>
+        <child link="l_wheel_link"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="0.01" friction="0.01"/>
     </joint>
 
-    <joint name="l_r_wheel_joint" type="continuous">
-        <origin xyz="-0.45 0.325 0.225" rpy="0 0 0"/>
+    <joint name="r_wheel_joint" type="continuous">
+        <origin xyz="0 ${-wheel_y} 0" rpy="0 0 0"/>
         <parent link="base_link"/>
-        <child link="l_r_wheel_link"/>
-        <axis xyz="0.0 1.0 0.0"/>
-        <dynamics damping="1.0" friction="0.1"/>
-    </joint>
-
-    <joint name="r_r_wheel_joint" type="continuous">
-        <origin xyz="-0.45 -0.325 0.225" rpy="0 0 0"/>
-        <parent link="base_link"/>
-        <child link="r_r_wheel_link"/>
-        <axis xyz="0.0 1.0 0.0"/>
-        <dynamics damping="1.0" friction="0.1"/>
-    </joint>
-
-    <joint name="r_f_wheel_joint" type="continuous">
-        <origin xyz="0.45 -0.325 0.225" rpy="0 0 0"/>
-        <parent link="base_link"/>
-        <child link="r_f_wheel_link"/>
-        <axis xyz="0.0 1.0 0.0"/>
-        <dynamics damping="1.0" friction="0.1"/>
+        <child link="r_wheel_link"/>
+        <axis xyz="0 1 0"/>
+        <dynamics damping="0.01" friction="0.01"/>
     </joint>
 
     <!-- =========================================== -->
-    <!-- ================ BUMPER JOINTS ============ -->
+    <!-- ================= CASTER ================== -->
     <!-- =========================================== -->
-    <joint name="front_bumper_joint" type="fixed">
-        <origin xyz="0.7 0.225 0.45" rpy="0 0 0"/>
+    <joint name="caster_joint" type="fixed">
+        <origin xyz="${caster_x} 0 ${caster_z}" rpy="0 0 0"/>
         <parent link="base_link"/>
-        <child link="front_bumper_link"/>
+        <child link="caster_link"/>
     </joint>
 
-    <!-- Mirrors front_bumper_joint across the YZ plane (X negated) to
-         counterbalance the front bumper's mass and pull the whole-robot
-         center of mass back toward base_link's origin. -->
-    <joint name="rear_bumper_joint" type="fixed">
-        <origin xyz="-0.7 0.225 0.45" rpy="0 0 0"/>
+    <!-- =========================================== -->
+    <!-- ============== STEREO CAMERAS ============= -->
+    <!-- =========================================== -->
+    <joint name="stereo_bar_joint" type="fixed">
+        <origin xyz="${bar_x} 0 ${bar_z}" rpy="0 0 0"/>
         <parent link="base_link"/>
-        <child link="rear_bumper_link"/>
+        <child link="stereo_bar_link"/>
     </joint>
 
-    <!-- =========================================== -->
-    <!-- ================ MONO CAMERA JOINTS ============ -->
-    <!-- =========================================== -->
-    <joint name="f_camera_joint" type="fixed">
-        <origin xyz="0.6525 0.0 0.6625" rpy="0 0 0"/>
-        <parent link="base_link"/>
-        <child link="f_camera_link"/>
-    </joint>
+    <xacro:macro name="camera_joints" params="side y">
+        <joint name="cam_${side}_joint" type="fixed">
+            <origin xyz="${cam_dx} ${y} 0" rpy="0 0 0"/>
+            <parent link="stereo_bar_link"/>
+            <child link="cam_${side}_link"/>
+        </joint>
+        <joint name="cam_${side}_optical_joint" type="fixed">
+            <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+            <parent link="cam_${side}_link"/>
+            <child link="cam_${side}_optical_frame"/>
+        </joint>
+    </xacro:macro>
 
-    <joint name="r_camera_joint" type="fixed">
-        <origin xyz="-0.6525 0.0 0.6625" rpy="0 0 ${pi}"/>
-        <parent link="base_link"/>
-        <child link="r_camera_link"/>
-    </joint>
-
-    <!-- Optical frames: sit at the lens (matches the 0.05 m sensor <pose> in
-         gazebo_sensors.xacro) with REP-103 axis rotation. -->
-    <joint name="f_camera_optical_joint" type="fixed">
-        <origin xyz="0.05 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-        <parent link="f_camera_link"/>
-        <child link="f_camera_optical_link"/>
-    </joint>
-    <joint name="r_camera_optical_joint" type="fixed">
-        <origin xyz="0.05 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-        <parent link="r_camera_link"/>
-        <child link="r_camera_optical_link"/>
-    </joint>
+    <xacro:camera_joints side="left"  y="${stereo_baseline/2}"/>
+    <xacro:camera_joints side="right" y="${-stereo_baseline/2}"/>
 
     <!-- =========================================== -->
-    <!-- ============== IMU + GPS JOINTS =========== -->
+    <!-- ================ IMU / GPS ================ -->
     <!-- =========================================== -->
-    <!-- IMU near the whole-robot CoM (base_link inertial origin). -->
     <joint name="imu_joint" type="fixed">
-        <origin xyz="0 0 0.486" rpy="0 0 0"/>
+        <origin xyz="${imu_x} 0 ${imu_z}" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="imu_link"/>
     </joint>
 
-    <!-- GPS antenna on top of the chassis (top face is z = 0.636), slightly
-         aft so it clears the cameras' view. -->
     <joint name="gps_joint" type="fixed">
-        <origin xyz="-0.2 0 0.636" rpy="0 0 0"/>
+        <origin xyz="${gps_x} 0 ${gps_z}" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="gps_link"/>
     </joint>
