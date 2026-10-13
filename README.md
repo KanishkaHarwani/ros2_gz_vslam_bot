@@ -121,7 +121,7 @@ ros2_gz_vslam_bot/
 
 ## Software Stack (proposed)
 
-- ROS 2 Humble + Gazebo Fortress (`ros_gz_sim`, `ros_gz_bridge`, `ros_gz_image`)
+- ROS 2 Jazzy + Gazebo Harmonic (gz-sim 8) (`ros_gz_sim`, `ros_gz_bridge`, `ros_gz_image`)
 - VSLAM framework — not yet chosen. Candidates for a stereo(+IMU) camera:
   - **ORB-SLAM3** — stereo, mono and visual-inertial modes; maps directly onto
     the `stereo_mode` toggle and the IMU. More integration work.

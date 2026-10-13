@@ -17,7 +17,12 @@
 #
 # Ctrl+C once will stop everything this script started.
 
+<<<<<<< HEAD
 set -u
+=======
+# NOTE: no `set -u` here. ROS setup.bash files read unset variables
+# (e.g. AMENT_TRACE_SETUP_FILES) and abort under it.
+>>>>>>> acfc885 (Redesign: small 2-wheel stereo robot, single-laptop sim, Jazzy/Harmonic)
 
 WORLD="${1:-empty.world}"
 STEREO_MODE="${2:-stereo}"
@@ -33,8 +38,23 @@ case "$GPS_ARG" in
 esac
 
 # ---- Adjust these if your setup differs ------------------------------
+<<<<<<< HEAD
 ROS_DISTRO_SETUP="/opt/ros/humble/setup.bash"
 WORKSPACE_SETUP="$HOME/ros2_ws/install/setup.bash"
+=======
+# Auto-detect the ROS 2 install: the already-sourced $ROS_DISTRO first, then
+# jazzy, then humble. Override by exporting ROS_SETUP=/opt/ros/<distro>/setup.bash
+ROS_DISTRO_SETUP="${ROS_SETUP:-}"
+if [ -z "$ROS_DISTRO_SETUP" ]; then
+    for d in "${ROS_DISTRO:-}" jazzy humble; do
+        if [ -n "$d" ] && [ -f "/opt/ros/$d/setup.bash" ]; then
+            ROS_DISTRO_SETUP="/opt/ros/$d/setup.bash"
+            break
+        fi
+    done
+fi
+WORKSPACE_SETUP="$HOME/learn_ws/install/setup.bash"
+>>>>>>> acfc885 (Redesign: small 2-wheel stereo robot, single-laptop sim, Jazzy/Harmonic)
 PACKAGE_NAME="ros2_gz_vslam_bot"
 
 # teleop_twist_joy axis/button mapping — controller-specific, re-check
@@ -46,9 +66,15 @@ SCALE_ANGULAR=1.0    # rad/s (robot limit is 2.0)
 ENABLE_BUTTON=0
 # ------------------------------------------------------------------------
 
+<<<<<<< HEAD
 echo "==> Sourcing ROS 2 environment"
 if [ ! -f "$ROS_DISTRO_SETUP" ]; then
     echo "ERROR: $ROS_DISTRO_SETUP not found. Is ROS 2 Humble installed?"
+=======
+echo "==> Sourcing ROS 2 environment (${ROS_DISTRO_SETUP:-none found})"
+if [ -z "$ROS_DISTRO_SETUP" ] || [ ! -f "$ROS_DISTRO_SETUP" ]; then
+    echo "ERROR: no ROS 2 install found under /opt/ros (looked for jazzy, humble)."
+>>>>>>> acfc885 (Redesign: small 2-wheel stereo robot, single-laptop sim, Jazzy/Harmonic)
     exit 1
 fi
 # shellcheck disable=SC1090

@@ -1,14 +1,18 @@
 Panels:
   - Class: rviz_common/Displays
+    Help Height: 70
     Name: Displays
     Property Tree Widget:
       Expanded:
         - /Global Options1
         - /Status1
       Splitter Ratio: 0.5
-    Tree Height: 400
+    Tree Height: 218
   - Class: rviz_common/Views
+    Expanded:
+      - /Current View1
     Name: Views
+    Splitter Ratio: 0.5
 Visualization Manager:
   Class: ""
   Displays:
@@ -18,7 +22,7 @@ Visualization Manager:
       Color: 160; 160; 164
       Enabled: true
       Line Style:
-        Line Width: 0.03
+        Line Width: 0.029999999329447746
         Value: Lines
       Name: Grid
       Normal Cell Count: 0
@@ -33,6 +37,7 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
       Collision Enabled: false
+      Description File: ""
       Description Source: Topic
       Description Topic:
         Depth: 5
@@ -41,6 +46,68 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /robot_description
       Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        cam_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        cam_left_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        cam_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        cam_right_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        caster_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        gps_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        l_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        r_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        stereo_bar_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Mass Properties:
+        Inertia: false
+        Mass: false
       Name: RobotModel
       TF Prefix: ""
       Update Interval: 0
@@ -48,12 +115,60 @@ Visualization Manager:
       Visual Enabled: true
     - Class: rviz_default_plugins/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 15
-      Marker Scale: 0.3
+      Frames:
+        All Enabled: true
+        base_link:
+          Value: true
+        cam_left_link:
+          Value: true
+        cam_left_optical_frame:
+          Value: true
+        cam_right_link:
+          Value: true
+        cam_right_optical_frame:
+          Value: true
+        caster_link:
+          Value: true
+        gps_link:
+          Value: true
+        imu_link:
+          Value: true
+        l_wheel_link:
+          Value: true
+        odom:
+          Value: true
+        r_wheel_link:
+          Value: true
+        stereo_bar_link:
+          Value: true
+      Marker Scale: 0.30000001192092896
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: false
+      Tree:
+        odom:
+          base_link:
+            caster_link:
+              {}
+            gps_link:
+              {}
+            imu_link:
+              {}
+            l_wheel_link:
+              {}
+            r_wheel_link:
+              {}
+            stereo_bar_link:
+              cam_left_link:
+                cam_left_optical_frame:
+                  {}
+              cam_right_link:
+                cam_right_optical_frame:
+                  {}
       Update Interval: 0
       Value: true
     - Class: rviz_default_plugins/Image
@@ -103,15 +218,39 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 2.0
+      Distance: 2
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
       Focal Point:
         X: 0
         Y: 0
         Z: 0
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
       Name: Current View
-      Near Clip Distance: 0.01
+      Near Clip Distance: 0.009999999776482582
       Pitch: 0.5
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.9
+      Yaw: 2.9000000953674316
     Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1011
+  Hide Left Dock: false
+  Hide Right Dock: false
+  Left camera:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd0000000200000000000001c900000288fc0200000002fb000000100044006900730070006c006100790073010000014c00000160000000cc00fffffffb0000000a0056006900650077007301000002b200000122000000a900ffffff000000020000039f00000107fc0100000002fb00000016004c006500660074002000630061006d0065007200610100000000000001cf0000008500fffffffb0000001800520069006700680074002000630061006d00650072006101000001d5000001ca0000008d00ffffff000001d00000028800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Right camera:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 927
+  X: 993
+  Y: 32

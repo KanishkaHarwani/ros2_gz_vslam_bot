@@ -1,6 +1,6 @@
-# Runbook — ros2_gz_vslam_bot (Ignition Fortress + ROS 2 Humble)
+# Runbook — ros2_gz_vslam_bot (Gazebo Harmonic + ROS 2 Jazzy)
 
-Commands assume ROS 2 Humble and Ignition Fortress are installed system-wide
+Commands assume ROS 2 Jazzy and Gazebo Harmonic (gz-sim 8) are installed system-wide
 and your workspace is at `~/ros2_ws` (adjust paths as needed).
 
 ---
@@ -11,15 +11,15 @@ and your workspace is at `~/ros2_ws` (adjust paths as needed).
 ```bash
 sudo apt update
 sudo apt install -y \
-  ros-humble-ros-gz \
-  ros-humble-ros-gz-sim \
-  ros-humble-ros-gz-bridge \
-  ros-humble-ros-gz-image \
-  ros-humble-robot-state-publisher \
-  ros-humble-xacro \
-  ros-humble-rviz2 \
-  ros-humble-joy \
-  ros-humble-teleop-twist-joy
+  ros-jazzy-ros-gz \
+  ros-jazzy-ros-gz-sim \
+  ros-jazzy-ros-gz-bridge \
+  ros-jazzy-ros-gz-image \
+  ros-jazzy-robot-state-publisher \
+  ros-jazzy-xacro \
+  ros-jazzy-rviz2 \
+  ros-jazzy-joy \
+  ros-jazzy-teleop-twist-joy
 ```
 
 ### 1.2 Place the package and build
@@ -38,7 +38,7 @@ There are no mesh files; no `description/meshes/` folder is needed.
 
 ### 2.1 Source your environment (every new terminal)
 ```bash
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 source ~/ros2_ws/install/setup.bash
 ```
 
@@ -66,9 +66,9 @@ If gz-sim opens with an empty world and no robot, wait a few seconds:
 ## 3. Verifying it's working
 
 ### 3.1 Gazebo-side topics
-Use `ign topic -l` (on this machine `gz topic -l` can wrongly report "not running"):
+Harmonic uses the `gz` command (there is no `ign`):
 ```bash
-ign topic -l | grep -E "camera|imu|navsat|odom|cmd_vel"
+gz topic -l | grep -E "camera|imu|navsat|odom|cmd_vel"
 ```
 
 ### 3.2 ROS-side topics and rates
@@ -97,7 +97,7 @@ bridge endpoint; `ros2 topic hz` showing no data is the real test.)
 ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist \
   "{linear: {x: 0.3}, angular: {z: 0.0}}"
 
-sudo apt install -y ros-humble-teleop-twist-keyboard   # one-time
+sudo apt install -y ros-jazzy-teleop-twist-keyboard   # one-time
 ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 Robot limits: 1.0 m/s linear, 2.0 rad/s angular.
@@ -141,8 +141,8 @@ wheels+caster support triangle.
 
 | Symptom | Likely cause |
 |---|---|
-| No camera data | Sensors plugin missing `ogre2` in the world, or `image_bridge` not running; check `ign topic -l` first to separate Gazebo-side from bridge-side |
-| No `/imu` data | World is missing the `ignition::gazebo::systems::Imu` plugin |
+| No camera data | Sensors plugin missing `ogre2` in the world, or `image_bridge` not running; check `gz topic -l` first to separate Gazebo-side from bridge-side |
+| No `/imu` data | World is missing the `gz::sim::systems::Imu` plugin (`gz-sim-imu-system`) |
 | No `/navsat` data | `enable_gps:=true` not set, or world lacks the NavSat plugin / `<spherical_coordinates>` |
 | Robot doesn't move on `/cmd_vel` | Joint names in `gazebo_controls.xacro` (`l_wheel_joint`, `r_wheel_joint`) must match `joints.xacro` |
 | Robot tips forward/back or drags | Check caster friction (`gazebo_materials.xacro`) and that `check_envelope.py` reports CoM inside the support triangle |

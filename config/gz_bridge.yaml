@@ -1,6 +1,6 @@
 # Bridges gz-transport topics <-> ROS 2 topics.
-# Ignition Fortress + ros_gz_bridge (Humble). Type strings use gz.msgs.*,
-# which the bridge accepts as an alias for ignition.msgs.* on Humble.
+# Gazebo Harmonic (gz-sim 8) + ros_gz_bridge (ROS 2 Jazzy). Type strings use
+# the native gz.msgs.* names.
 #
 # Images (camera/left/image, camera/right/image) are NOT here: they go
 # through ros_gz_image's image_bridge (see launch_sim.launch.py).
