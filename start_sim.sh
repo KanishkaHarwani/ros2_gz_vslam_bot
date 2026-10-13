@@ -17,12 +17,8 @@
 #
 # Ctrl+C once will stop everything this script started.
 
-<<<<<<< HEAD
-set -u
-=======
 # NOTE: no `set -u` here. ROS setup.bash files read unset variables
 # (e.g. AMENT_TRACE_SETUP_FILES) and abort under it.
->>>>>>> acfc885 (Redesign: small 2-wheel stereo robot, single-laptop sim, Jazzy/Harmonic)
 
 WORLD="${1:-empty.world}"
 STEREO_MODE="${2:-stereo}"
@@ -38,10 +34,6 @@ case "$GPS_ARG" in
 esac
 
 # ---- Adjust these if your setup differs ------------------------------
-<<<<<<< HEAD
-ROS_DISTRO_SETUP="/opt/ros/humble/setup.bash"
-WORKSPACE_SETUP="$HOME/ros2_ws/install/setup.bash"
-=======
 # Auto-detect the ROS 2 install: the already-sourced $ROS_DISTRO first, then
 # jazzy, then humble. Override by exporting ROS_SETUP=/opt/ros/<distro>/setup.bash
 ROS_DISTRO_SETUP="${ROS_SETUP:-}"
@@ -53,8 +45,21 @@ if [ -z "$ROS_DISTRO_SETUP" ]; then
         fi
     done
 fi
-WORKSPACE_SETUP="$HOME/learn_ws/install/setup.bash"
->>>>>>> acfc885 (Redesign: small 2-wheel stereo robot, single-laptop sim, Jazzy/Harmonic)
+# Workspace auto-detect. Order: $WORKSPACE_SETUP override, then the workspace
+# this script sits in (<ws>/src/ros2_gz_vslam_bot/start_sim.sh -> <ws>/install),
+# then common names. Works for ~/learn_ws, ~/ros2_ws, or anything else.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_SETUP="${WORKSPACE_SETUP:-}"
+if [ -z "$WORKSPACE_SETUP" ]; then
+    for c in "$SCRIPT_DIR/../../install/setup.bash" \
+             "$HOME/learn_ws/install/setup.bash" \
+             "$HOME/ros2_ws/install/setup.bash"; do
+        if [ -f "$c" ]; then
+            WORKSPACE_SETUP="$(cd "$(dirname "$c")" && pwd)/setup.bash"
+            break
+        fi
+    done
+fi
 PACKAGE_NAME="ros2_gz_vslam_bot"
 
 # teleop_twist_joy axis/button mapping — controller-specific, re-check
@@ -66,25 +71,21 @@ SCALE_ANGULAR=1.0    # rad/s (robot limit is 2.0)
 ENABLE_BUTTON=0
 # ------------------------------------------------------------------------
 
-<<<<<<< HEAD
-echo "==> Sourcing ROS 2 environment"
-if [ ! -f "$ROS_DISTRO_SETUP" ]; then
-    echo "ERROR: $ROS_DISTRO_SETUP not found. Is ROS 2 Humble installed?"
-=======
 echo "==> Sourcing ROS 2 environment (${ROS_DISTRO_SETUP:-none found})"
 if [ -z "$ROS_DISTRO_SETUP" ] || [ ! -f "$ROS_DISTRO_SETUP" ]; then
     echo "ERROR: no ROS 2 install found under /opt/ros (looked for jazzy, humble)."
->>>>>>> acfc885 (Redesign: small 2-wheel stereo robot, single-laptop sim, Jazzy/Harmonic)
     exit 1
 fi
 # shellcheck disable=SC1090
 source "$ROS_DISTRO_SETUP"
 
-if [ ! -f "$WORKSPACE_SETUP" ]; then
-    echo "ERROR: $WORKSPACE_SETUP not found. Build the workspace first:"
-    echo "  cd ~/ros2_ws && colcon build --packages-select ${PACKAGE_NAME}"
+if [ -z "$WORKSPACE_SETUP" ] || [ ! -f "$WORKSPACE_SETUP" ]; then
+    echo "ERROR: no built workspace found. Build it first, from your workspace root:"
+    echo "  colcon build --packages-select ${PACKAGE_NAME}"
+    echo "or point the script at it: WORKSPACE_SETUP=/path/to/ws/install/setup.bash ./start_sim.sh"
     exit 1
 fi
+echo "==> Using workspace: ${WORKSPACE_SETUP}"
 # shellcheck disable=SC1090
 source "$WORKSPACE_SETUP"
 
